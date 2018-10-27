@@ -22,7 +22,13 @@ export default class TodoItem extends React.Component {
             checked={model.done}
             onChange={this.handleCheckedChange}
           />
-          <span>{model.description}</span>
+          <span
+            style={{
+              textDecoration: model.done ? "line-through" : ""
+            }}
+          >
+            {model.description}
+          </span>
         </label>
         <button
           className="btn-small col col-4"

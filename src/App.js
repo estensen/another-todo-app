@@ -5,7 +5,8 @@ import Todo from './models'
 import TodoItem from "./components/TodoItem";
 
 const initialState = {
-  todos: null
+  todos: null,
+  filter: "all",
 }
 
 class App extends Component {
@@ -51,15 +52,32 @@ class App extends Component {
     }))
   }
 
+  updateTodoToShow = filter => {
+    this.setState({
+      filter: filter
+    })
+  }
+
   render() {
-    const { todos } = this.state
+    const { filter, todos } = this.state
+    let filteredTodos
+
+    if (todos) {
+      if (filter === 'all') {
+        filteredTodos = todos
+      } else if (filter === 'active') {
+        filteredTodos = todos.filter(todo => !todo.done)
+      } else if (filter === 'complete') {
+        filteredTodos = todos.filter(todo => todo.done)
+      }
+    }
 
     return (
       <main className="container">
         <h1 className="text-center">Another Todo App</h1>
         <CreateTodo onCreate={this.handleTodoCreate} />
-        {todos &&
-          todos.map(todoItem => {
+        {filteredTodos &&
+        filteredTodos.map(todoItem => {
             return (
               <TodoItem
                 key={todoItem.id}
@@ -72,6 +90,11 @@ class App extends Component {
         <p className="border border-muted padding-large text-center">
           Remaining todos: <b>{this.todosLeftCount}</b>
         </p>
+        <div>
+          <button onClick={() => this.updateTodoToShow("all")}>all</button>
+          <button onClick={() => this.updateTodoToShow("active")}>active</button>
+          <button onClick={() => this.updateTodoToShow("complete")}>complete</button>
+        </div>
       </main>
     );
   }

@@ -23,18 +23,13 @@ class App extends Component {
     todosRef.onSnapshot(snapshot => {
       let changes = snapshot.docChanges()
       changes.forEach(change => {
-        console.log(change.doc.id)
-        console.log(change.doc.data())
-        // Check if already in state
         const id = change.doc.id
         if (change.type === 'added') {
           const done = change.doc.data().done
           const description = change.doc.data().description
           this.addTodo(id, done, description)
         } else if (change.type === 'remove') {
-          // Check if already in state
           this.removeTodo(id)
-          console.log('TODO: Remove from state')
         }
       })
     })
@@ -55,7 +50,6 @@ class App extends Component {
   }
 
   removeTodo = id => {
-    console.log(id)
     todosRef.doc(id).delete()
   }
 
@@ -81,6 +75,8 @@ class App extends Component {
     this.setState(() => ({
       todos: newTodos,
     }))
+
+    todosRef.doc(id).update({ done: true })
   }
 
   handleTodoRemoval = id => {

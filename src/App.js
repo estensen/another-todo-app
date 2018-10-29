@@ -21,20 +21,16 @@ class App extends Component {
   componentWillMount() {
     todosRef.get().then(snapshot => {
       snapshot.docs.forEach(doc => {
+        console.log(doc.id)
         console.log(doc.data())
+
+        const id = doc.id
+        const done = doc.data().done
+        const description = doc.data().description
       })
     })
 
-    /*
-    this.db.on('value', snapshot => {
-      const newTodo = new Todo(snapshot.description)
-      prevTodos.push({
-        id: newTodo.id,
-        done: newTodo.done,
-        description: newTodo.description,
-      })
-    })
-    */
+    // Diff between state and Firestore
   }
 
   get todosLeftCount() {
@@ -49,8 +45,11 @@ class App extends Component {
     this.setState(() => ({
       todos: newTodos,
     }))
+    // Get from Firestore instead of placing directly to state? No
+    // Subscribe to changes so it will update state when change occur
+    // The local id should also be used in Firestore
 
-    todosRef.add({
+    todosRef.doc(newTodo.id).set({
       "done": newTodo.done,
       "description": newTodo.description,
     })
@@ -80,6 +79,8 @@ class App extends Component {
     this.setState(() => ({
       todos: newTodos,
     }))
+
+    todosRef.doc(id).delete()
   }
 
   updateTodoToShow = filter => {

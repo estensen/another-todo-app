@@ -6,8 +6,6 @@ import Todo from './models'
 import TodoItem from "./components/TodoItem"
 import firebase from './config/firebase'
 
-console.log(firebase.name)
-console.log(firebase.database())
 const db = firebase.firestore()
 db.settings({ timestampsInSnapshots: true })
 const todosRef = db.collection('todos')
@@ -19,6 +17,25 @@ const initialState = {
 
 class App extends Component {
   state = initialState
+
+  componentWillMount() {
+    todosRef.get().then(snapshot => {
+      snapshot.docs.forEach(doc => {
+        console.log(doc.data())
+      })
+    })
+
+    /*
+    this.db.on('value', snapshot => {
+      const newTodo = new Todo(snapshot.description)
+      prevTodos.push({
+        id: newTodo.id,
+        done: newTodo.done,
+        description: newTodo.description,
+      })
+    })
+    */
+  }
 
   get todosLeftCount() {
     const { todos } = this.state

@@ -19,18 +19,25 @@ class App extends Component {
   state = initialState
 
   componentWillMount() {
-    todosRef.get().then(snapshot => {
-      snapshot.docs.forEach(doc => {
-        console.log(doc.id)
-        console.log(doc.data())
-
-        const id = doc.id
-        const done = doc.data().done
-        const description = doc.data().description
+    // Diff between state and Firestore
+    todosRef.onSnapshot(snapshot => {
+      let changes = snapshot.docChanges()
+      changes.forEach(change => {
+        console.log(change.doc.id)
+        console.log(change.doc.data())
+        // Check if already in state
+        const id = change.doc.id
+        if (change.type === 'added') {
+          const done = change.doc.data().done
+          const description = change.doc.data().description
+          this.addTodo(id, done, description)
+        } else if (change.type === 'remove') {
+          // Check if already in state
+          this.removeTodo(id)
+          console.log('TODO: Remove from state')
+        }
       })
     })
-
-    // Diff between state and Firestore
   }
 
   get todosLeftCount() {
@@ -38,20 +45,27 @@ class App extends Component {
     return todos ? todos.filter(todo => !todo.done).length : 0
   }
 
-  handleTodoCreate = description => {
-    const newTodo = new Todo(description)
+  addTodo = (id, done, description) => {
+    const newTodo = new Todo(description, id, done)
 
     const newTodos = [...(this.state.todos || []), newTodo]
     this.setState(() => ({
       todos: newTodos,
     }))
-    // Get from Firestore instead of placing directly to state? No
-    // Subscribe to changes so it will update state when change occur
-    // The local id should also be used in Firestore
+  }
+
+  removeTodo = id => {
+    console.log(id)
+    todosRef.doc(id).delete()
+  }
+
+  handleTodoCreate = description => {
+
+    const newTodo = new Todo(description)
 
     todosRef.doc(newTodo.id).set({
-      "done": newTodo.done,
       "description": newTodo.description,
+      "done": newTodo.done,
     })
   }
 
@@ -81,6 +95,7 @@ class App extends Component {
     }))
 
     todosRef.doc(id).delete()
+    this.removeTodo(id)
   }
 
   updateTodoToShow = filter => {

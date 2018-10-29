@@ -1,8 +1,16 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+
 import './App.css';
-import CreateTodo from "./components/CreateTodo";
+import CreateTodo from "./components/CreateTodo"
 import Todo from './models'
-import TodoItem from "./components/TodoItem";
+import TodoItem from "./components/TodoItem"
+import firebase from './config/firebase'
+
+console.log(firebase.name)
+console.log(firebase.database())
+const db = firebase.firestore()
+db.settings({ timestampsInSnapshots: true })
+const todosRef = db.collection('todos')
 
 const initialState = {
   todos: null,
@@ -24,6 +32,11 @@ class App extends Component {
     this.setState(() => ({
       todos: newTodos,
     }))
+
+    todosRef.add({
+      "done": newTodo.done,
+      "description": newTodo.description,
+    })
   }
 
   handleTodoCompleteChange = id => {
